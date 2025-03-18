@@ -739,6 +739,7 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
         DataFrame: With completed orientation data
     """
     import os
+    import importlib.util
     from pathlib import Path
     
     # Create output directory
@@ -753,7 +754,47 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
     logger.info("Grouping images by flight...")
     metadata_df = group_images_by_flight(metadata_df)
     
-    # 2. Process each flight group
+    # Check if pycolmap is available if requested
+    pycolmap_available = False
+    if method in ['auto', 'pycolmap', 'hierarchical']:
+        pycolmap_spec = importlib.util.find_spec("pycolmap")
+        if pycolmap_spec is not None:
+            try:
+                from .pycolmap_wrapper import has_pycolmap
+                pycolmap_available = has_pycolmap()
+            except ImportError:
+                logger.warning("Failed to import pycolmap_wrapper")
+    
+    # Determine method to use based on availability and request
+    if method == 'auto':
+        if pycolmap_available:
+            selected_method = 'pycolmap'
+            logger.info("Using pycolmap for SfM processing (auto-selected)")
+        else:
+            selected_method = 'subprocess'
+            logger.info("Using subprocess-based COLMAP for SfM processing (auto-selected)")
+    else:
+        selected_method = method
+        if selected_method in ['pycolmap', 'hierarchical'] and not pycolmap_available:
+            logger.warning(f"{selected_method} method requested but pycolmap not available, falling back to subprocess")
+            selected_method = 'subprocess'
+        logger.info(f"Using {selected_method} method for SfM processing (user-selected)")
+    
+    # Import appropriate functions based on selected method
+    if selected_method == 'pycolmap':
+        try:
+            from .pycolmap_wrapper import run_pycolmap_sfm, run_pycolmap_sfm_with_enhanced_stability
+        except ImportError:
+            logger.error("Failed to import pycolmap wrapper, falling back to subprocess method")
+            selected_method = 'subprocess'
+    elif selected_method == 'hierarchical':
+        try:
+            from .pycolmap_wrapper import run_hierarchical_sfm
+        except ImportError:
+            logger.error("Failed to import hierarchical method, falling back to subprocess method")
+            selected_method = 'subprocess'
+    
+    # Continue with your existing code for processing flight groups, but use the selected method
     all_results = []
     
     for group_id, group_df in metadata_df.groupby('FlightGroup'):
@@ -771,57 +812,66 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
         
         # Check if this is a large flight group that needs batch processing
         if len(group_df) > MAX_IMAGES_PER_BATCH:
-            logger.info(f"Flight group {group_id} is large, processing in batches")
-            
-            # Split into batches
-            batches = split_large_flight_group(group_df, MAX_IMAGES_PER_BATCH)
-            logger.info(f"Split into {len(batches)} batches")
-            
-            # Process each batch
-            batch_results = []
-            
-            for i, batch_df in enumerate(batches):
-                batch_dir = flight_dir / f"batch_{i}"
-                logger.info(f"Processing batch {i} with {len(batch_df)} images")
+            # Special handling for very large groups and hierarchical method
+            if selected_method == 'hierarchical' and len(group_df) > MAX_IMAGES_PER_BATCH * 2:
+                logger.info(f"Using hierarchical SfM for large flight group {group_id}")
                 
-                # Check if this batch has enough RGB images
-                rgb_count = batch_df['IsRGB'].sum()
-                if rgb_count < 3:
-                    logger.warning(f"Skipping batch {i}: not enough RGB images ({rgb_count})")
-                    batch_results.append(batch_df)
-                    continue
-                
-                # Process batch
+                # Process group
                 # 1. First, propagate within triplets
-                processed_batch = propagate_within_triplets(batch_df)
+                processed_group = propagate_within_triplets(group_df)
                 
                 # 2. Analyze flight pattern for initial estimates
-                initial_estimates, pattern = analyze_flight_pattern_for_initial_estimates(processed_batch)
+                initial_estimates, pattern = analyze_flight_pattern_for_initial_estimates(processed_group)
                 
-                # 3. Run SfM
-                if has_colmap():
-                    # Use COLMAP if available
-                    logger.info(f"Running COLMAP SfM for batch {i}...")
-                    try:
-                        # sfm_results = run_colmap_sfm_optimized(initial_estimates, batch_dir, use_gpu)
-                        sfm_results = run_colmap_sfm_with_enhanced_stability(initial_estimates, flight_dir, use_gpu)
-                    except Exception as e:
-                        logger.error(f"Error during COLMAP processing: {e}")
-                        sfm_results = initial_estimates
-                else:
-                    # Fall back to initial estimates only
-                    logger.warning("COLMAP not available, using pattern-based estimates only")
-                    sfm_results = initial_estimates
+                # 3. Run hierarchical SfM
+                sfm_results = run_hierarchical_sfm(initial_estimates, flight_dir, use_gpu)
                 
                 # 4. Validate and refine
-                final_batch = validate_and_refine_orientations(sfm_results, pattern)
-                batch_results.append(final_batch)
-            
-            # Combine batch results
-            combined_results = pd.concat(batch_results)
-            
-            # Propagate within triplets again for the combined results
-            flight_results = propagate_within_triplets(combined_results)
+                flight_results = validate_and_refine_orientations(sfm_results, pattern)
+            else:
+                # Standard batch processing for large groups
+                # Split into batches
+                batches = split_large_flight_group(group_df, MAX_IMAGES_PER_BATCH)
+                logger.info(f"Split into {len(batches)} batches")
+                
+                # Process each batch
+                batch_results = []
+                
+                for i, batch_df in enumerate(batches):
+                    batch_dir = flight_dir / f"batch_{i}"
+                    logger.info(f"Processing batch {i} with {len(batch_df)} images")
+                    
+                    # Check if this batch has enough RGB images
+                    rgb_count = batch_df['IsRGB'].sum()
+                    if rgb_count < 3:
+                        logger.warning(f"Skipping batch {i}: not enough RGB images ({rgb_count})")
+                        batch_results.append(batch_df)
+                        continue
+                    
+                    # Process batch
+                    # 1. First, propagate within triplets
+                    processed_batch = propagate_within_triplets(batch_df)
+                    
+                    # 2. Analyze flight pattern for initial estimates
+                    initial_estimates, pattern = analyze_flight_pattern_for_initial_estimates(processed_batch)
+                    
+                    # 3. Run SfM with selected method
+                    if selected_method == 'pycolmap':
+                        # Use pycolmap with enhanced stability for batch processing
+                        sfm_results = run_pycolmap_sfm_with_enhanced_stability(initial_estimates, batch_dir, use_gpu)
+                    else:
+                        # Use subprocess method
+                        sfm_results = run_colmap_sfm_with_enhanced_stability(initial_estimates, batch_dir, use_gpu)
+                    
+                    # 4. Validate and refine
+                    final_batch = validate_and_refine_orientations(sfm_results, pattern)
+                    batch_results.append(final_batch)
+                
+                # Combine batch results
+                combined_results = pd.concat(batch_results)
+                
+                # Propagate within triplets for the combined results
+                flight_results = propagate_within_triplets(combined_results)
         else:
             # Regular processing for normal-sized flight groups
             # 1. First, propagate within triplets
@@ -830,19 +880,21 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
             # 2. Analyze flight pattern for initial estimates
             initial_estimates, pattern = analyze_flight_pattern_for_initial_estimates(processed_group)
             
-            # 3. Run SfM
-            if has_colmap():
-                # Use COLMAP if available
-                logger.info(f"Running COLMAP SfM for flight {group_id}...")
-                try:
-                    sfm_results = run_colmap_sfm_optimized(initial_estimates, flight_dir, use_gpu)
-                except Exception as e:
-                    logger.error(f"Error during COLMAP processing: {e}")
-                    sfm_results = initial_estimates
+            # 3. Run SfM with selected method
+            if selected_method == 'pycolmap':
+                logger.info(f"Running pycolmap SfM for flight {group_id}...")
+                sfm_results = run_pycolmap_sfm(initial_estimates, flight_dir, use_gpu)
+            elif selected_method == 'hierarchical':
+                logger.info(f"Running hierarchical SfM for flight {group_id}...")
+                sfm_results = run_hierarchical_sfm(initial_estimates, flight_dir, use_gpu)
             else:
-                # Fall back to initial estimates only
-                logger.warning("COLMAP not available, using pattern-based estimates only")
-                sfm_results = initial_estimates
+                # Use subprocess method
+                if has_colmap():
+                    logger.info(f"Running subprocess COLMAP SfM for flight {group_id}...")
+                    sfm_results = run_colmap_sfm_optimized(initial_estimates, flight_dir, use_gpu)
+                else:
+                    logger.warning("COLMAP not available, using pattern-based estimates only")
+                    sfm_results = initial_estimates
             
             # 4. Validate and refine
             flight_results = validate_and_refine_orientations(sfm_results, pattern)

@@ -54,6 +54,10 @@ def main():
                        help='Path to output directory')
     parser.add_argument('--cpu', action='store_true',
                        help='Use CPU only (no GPU acceleration)')
+    parser.add_argument('--method', type=str, 
+                       choices=['auto', 'subprocess', 'pycolmap', 'hierarchical'],
+                       default='auto',
+                       help='COLMAP implementation to use: auto (default), subprocess, pycolmap, or hierarchical')
     
     args = parser.parse_args()
     
@@ -85,9 +89,14 @@ def main():
     logger.info(f"Initial metadata: {initial_orientation_count} of {len(metadata_df)} images have orientation data ({initial_orientation_count/len(metadata_df)*100:.1f}%)")
     
     # Process metadata with SfM
-    logger.info("Processing metadata with SfM...")
+    logger.info(f"Processing metadata with SfM using {args.method} method...")
     try:
-        result_df = process_metadata_with_sfm(metadata_df, args.output, use_gpu=not args.cpu)
+        result_df = process_metadata_with_sfm(
+            metadata_df, 
+            args.output, 
+            use_gpu=not args.cpu,
+            method=args.method
+        )
     except Exception as e:
         logger.error(f"Error processing orientations: {e}")
         import traceback
@@ -111,6 +120,7 @@ def main():
     logger.info(f"Added orientation data for {final_orientation_count - initial_orientation_count} images")
     
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
