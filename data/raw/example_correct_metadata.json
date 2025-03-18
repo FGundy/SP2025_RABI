@@ -1,0 +1,202 @@
+[
+  {
+    "SourceFile": "/mnt/d/DCIM/100MEDIA/IRX_0001.JPG",
+    "ExifTool": {
+      "ExifToolVersion": 12.76,
+      "Warning": "[minor] Unknown APP13 segment"
+    },
+    "System": {
+      "FileName": "IRX_0001.JPG",
+      "Directory": "/mnt/d/DCIM/100MEDIA",
+      "FileSize": "424 kB",
+      "FileModifyDate": "2025:02:23 16:41:20-05:00",
+      "FileAccessDate": "2025:02:23 16:41:20-05:00",
+      "FileInodeChangeDate": "2025:02:23 16:41:20-05:00",
+      "FilePermissions": "-rwxrwxrwx"
+    },
+    "File": {
+      "FileType": "JPEG",
+      "FileTypeExtension": "jpg",
+      "MIMEType": "image/jpeg",
+      "ExifByteOrder": "Big-endian (Motorola, MM)",
+      "Comment": "timestamp=549982\nexppts=550603489\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ",
+      "ImageWidth": 640,
+      "ImageHeight": 512,
+      "EncodingProcess": "Baseline DCT, Huffman coding",
+      "BitsPerSample": 8,
+      "ColorComponents": 3,
+      "YCbCrSubSampling": "YCbCr4:2:0 (2 2)"
+    },
+    "IFD0": {
+      "ImageDescription": "default",
+      "Make": "Autel Robotics",
+      "Model": "XT706",
+      "Orientation": "Horizontal (normal)",
+      "XResolution": 72,
+      "YResolution": 72,
+      "ResolutionUnit": "inches",
+      "Software": "V0.2.33.16",
+      "ModifyDate": "2025:02:23 16:41:21"
+    },
+    "ExifIFD": {
+      "ExposureTime": "undef",
+      "FNumber": 1.0,
+      "ExposureProgram": "Not Defined",
+      "ISO": 0,
+      "ExifVersion": "0221",
+      "DateTimeOriginal": "2025:02:23 16:41:21",
+      "CreateDate": "2025:02:23 16:41:21",
+      "ComponentsConfiguration": "Y, Cb, Cr, -",
+      "CompressedBitsPerPixel": 4.66796875,
+      "ShutterSpeedValue": 0,
+      "ApertureValue": 1.0,
+      "ExposureCompensation": 0,
+      "MaxApertureValue": 1.0,
+      "MeteringMode": "Unknown",
+      "LightSource": "Daylight",
+      "Flash": "No Flash",
+      "FocalLength": "14.0 mm",
+      "FlashpixVersion": "0100",
+      "ColorSpace": "sRGB",
+      "ExifImageWidth": 640,
+      "ExifImageHeight": 512,
+      "FocalPlaneXResolution": 2116.666667,
+      "FocalPlaneYResolution": 2116.666667,
+      "FocalPlaneResolutionUnit": "inches",
+      "SensingMethod": "One-chip color area",
+      "FileSource": "Digital Camera",
+      "SceneType": "Directly photographed",
+      "CustomRendered": "Normal",
+      "ExposureMode": "Auto",
+      "WhiteBalance": "Auto",
+      "DigitalZoomRatio": 0,
+      "FocalLengthIn35mmFormat": "0 mm",
+      "SceneCaptureType": "Standard",
+      "GainControl": "None",
+      "Contrast": "Normal",
+      "Saturation": "Normal",
+      "Sharpness": "Normal"
+    },
+    "MakerUnknown": {
+      "Unknown_0x0001": "EVO",
+      "Unknown_0x0002": 1,
+      "Unknown_0x0003": 0,
+      "Unknown_0x0004": 0,
+      "Unknown_0x0005": 0,
+      "Unknown_0x0006": -0.0153540186583996,
+      "Unknown_0x0007": -8.85188865661621,
+      "Unknown_0x0008": -0.206591635942459,
+      "Unknown_0x0009": 0,
+      "Unknown_0x000a": -8.85000038146973,
+      "Unknown_0x000b": 0,
+      "Unknown_0x000c": 0,
+      "Unknown_0x000d": 0,
+      "Unknown_0x000e": 0
+    },
+    "InteropIFD": {
+      "InteropIndex": "R98 - DCF basic file (sRGB)",
+      "InteropVersion": "0100"
+    },
+    "GPS": {
+      "GPSVersionID": "2.2.0.0",
+      "GPSLatitudeRef": "North",
+      "GPSLatitude": "40 deg 31' 27.83\"",
+      "GPSLongitudeRef": "West",
+      "GPSLongitude": "74 deg 27' 36.53\"",
+      "GPSAltitudeRef": "Below Sea Level",
+      "GPSAltitude": "0 m",
+      "GPSMapDatum": "WGS-84"
+    },
+    "IFD1": {
+      "ImageWidth": 160,
+      "ImageHeight": 120,
+      "Compression": "JPEG (old-style)",
+      "XResolution": 72,
+      "YResolution": 72,
+      "ResolutionUnit": "inches",
+      "ThumbnailOffset": 1494,
+      "ThumbnailLength": 11205,
+      "ThumbnailImage": "(Binary data 11205 bytes, use -b option to extract)"
+    },
+    "XMP-rdf": {
+      "About": "Autel Robotics Meta Data"
+    },
+    "XMP-xmp": {
+      "ModifyDate": "2025:02:23",
+      "CreateDate": "2025:02:23"
+    },
+    "XMP-tiff": {
+      "Make": "Autel Robotics",
+      "Model": "XT706"
+    },
+    "XMP-dc": {
+      "Format": "image/jpg"
+    },
+    "XMP-Camera": {
+      "Pitch": 90.0,
+      "Yaw": -8.85,
+      "Roll": 0.0,
+      "GPSXYAccuracy": 0.0,
+      "GPSZAccuracy": 0.0,
+      "AboveGroundAltitude": 0.0,
+      "ModelType": "perspective",
+      "PrincipalPoint": "3.840000,3.072000",
+      "PerspectiveFocalLength": 0.0,
+      "PerspectiveDistortion": "0.000000000000,0.000000000000,0.000000000000,0.000000000000,0.000000000000",
+      "HorizCS": "EPSG:4326",
+      "VertCS": "ellipsoidal"
+    },
+    "XMP-crs": {
+      "Version": 7.0,
+      "HasSettings": false,
+      "HasCrop": false,
+      "AlreadyApplied": false
+    },
+    "JFIF": {
+      "JFIFVersion": 1.01,
+      "ResolutionUnit": "None",
+      "XResolution": 1,
+      "YResolution": 1
+    },
+    "MPF0": {
+      "MPFVersion": "0100",
+      "NumberOfImages": 2,
+      "ImageUIDList": "(Binary data 66 bytes, use -b option to extract)",
+      "TotalFrames": 1
+    },
+    "MPImage1": {
+      "MPImageFlags": "Representative image, Dependent parent image",
+      "MPImageFormat": "JPEG",
+      "MPImageType": "Baseline MP Primary Image",
+      "MPImageLength": 285746,
+      "MPImageStart": 0,
+      "DependentImage1EntryNumber": 2,
+      "DependentImage2EntryNumber": 0
+    },
+    "MPImage2": {
+      "MPImageFlags": "Dependent child image",
+      "MPImageFormat": "JPEG",
+      "MPImageType": "Large Thumbnail (VGA equivalent)",
+      "MPImageLength": 118645,
+      "MPImageStart": 305773,
+      "DependentImage1EntryNumber": 0,
+      "DependentImage2EntryNumber": 0,
+      "PreviewImage": "(Binary data 118645 bytes, use -b option to extract)"
+    },
+    "Composite": {
+      "Aperture": 1.0,
+      "ImageSize": "640x512",
+      "Megapixels": 0.328,
+      "ScaleFactor35efl": 4.4,
+      "ShutterSpeed": "undef",
+      "GPSAltitude": "0 m Below Sea Level",
+      "GPSLatitude": "40 deg 31' 27.83\" N",
+      "GPSLongitude": "74 deg 27' 36.53\" W",
+      "CircleOfConfusion": "0.007 mm",
+      "FOV": "32.6 deg",
+      "FocalLength35efl": "14.0 mm (35 mm equivalent: 61.6 mm)",
+      "GPSPosition": "40 deg 31' 27.83\" N, 74 deg 27' 36.53\" W",
+      "HyperfocalDistance": "28.70 m"
+    }
+  }
+]

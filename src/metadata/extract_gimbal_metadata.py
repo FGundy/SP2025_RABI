@@ -1,3 +1,4 @@
+# src/metadata/extract_gimbal_metadata.py
 import subprocess
 import json
 import os
