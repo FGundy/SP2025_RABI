@@ -1,0 +1,5 @@
+2025-03-16 22:38:13,112 - path_check - INFO - Loading metadata from ./data/processed/metadata/basic_metadata.csv
+2025-03-16 22:38:13,139 - path_check - INFO - Loaded metadata for 4465 images
+2025-03-16 22:40:51,443 - path_check - INFO - Results: 4465 valid, 0 missing, 0 unreadable
+2025-03-16 22:40:51,456 - path_check - INFO - Found 3121 RGB images in metadata
+2025-03-16 22:40:51,456 - path_check - INFO - Of RGB images: 0 missing, 0 unreadable

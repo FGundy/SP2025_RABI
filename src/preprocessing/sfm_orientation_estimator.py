@@ -726,7 +726,7 @@ def run_colmap_sfm(flight_group, output_dir, use_gpu=True):
     # Call the optimized version
     return run_colmap_sfm_optimized(flight_group, output_dir, use_gpu)
 
-def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
+def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True, method='auto'):
     """
     Process all metadata with SfM-based orientation estimation
     
@@ -734,6 +734,7 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
         metadata_df: DataFrame with image metadata
         output_dir: Directory for output
         use_gpu: Whether to use GPU for COLMAP processing
+        method: COLMAP implementation to use: 'auto', 'subprocess', 'pycolmap', 'hierarchical'
         
     Returns:
         DataFrame: With completed orientation data
@@ -932,6 +933,7 @@ def process_metadata_with_sfm(metadata_df, output_dir, use_gpu=True):
         logger.info(f"  - {source}: {count} images")
         
     return final_df
+
 
 def quaternion_to_euler(qw, qx, qy, qz):
     """

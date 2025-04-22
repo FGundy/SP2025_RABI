@@ -25,6 +25,47 @@ logger = logging.getLogger(__name__)
 COLMAP_TIMEOUT = 1800  # 30 minutes timeout for COLMAP processes
 MAX_IMAGES_PER_BATCH = 150  # Maximum images to process in a batch
 
+def select_camera_model(image_metadata):
+    """
+    Select appropriate camera model based on image metadata
+    
+    Args:
+        image_metadata: Dictionary with image metadata
+        
+    Returns:
+        str: COLMAP camera model name
+    """
+    # Check for thermal images (IRX)
+    if 'Filename' in image_metadata and 'IRX' in image_metadata['Filename']:
+        # Thermal cameras often have different lens characteristics
+        return 'SIMPLE_RADIAL'
+    
+    # Check camera model
+    camera_model = image_metadata.get('CameraModel', '')
+    if 'Autel' in camera_model and 'EVO' in camera_model:
+        if 'ImageWidth' in image_metadata and image_metadata['ImageWidth'] > 3000:
+            # High-res RGB camera
+            return 'RADIAL'
+        else:
+            # Lower-res camera
+            return 'SIMPLE_PINHOLE'
+    
+    # Check image dimensions
+    if 'ImageWidth' in image_metadata and 'ImageHeight' in image_metadata:
+        width = image_metadata['ImageWidth']
+        height = image_metadata['ImageHeight']
+        
+        # For 4K or larger images
+        if width >= 3840 or height >= 3840:
+            return 'RADIAL'
+        # For very wide aspect ratios (panoramic)
+        elif width / height > 2.0 or height / width > 2.0:
+            return 'RADIAL'
+    
+    # Default for most cases
+    return 'SIMPLE_PINHOLE'
+
+    
 def has_colmap():
     """Check if COLMAP is available on the system with proper timeout handling"""
     try:
