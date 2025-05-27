@@ -1,13 +1,12 @@
 # backend/thermal_analysis/settings/base.py
 import os
 from pathlib import Path
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-change-me')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me-in-production')
 
 # Application definition
 DJANGO_APPS = [
@@ -72,11 +71,11 @@ ASGI_APPLICATION = 'thermal_analysis.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': config('POSTGRES_DB', default='thermal_analysis'),
-        'USER': config('POSTGRES_USER', default='postgres'),
-        'PASSWORD': config('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': config('DB_HOST', default='db'),
-        'PORT': config('DB_PORT', default='5432'),
+        'NAME': os.getenv('POSTGRES_DB', 'thermal_analysis'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -132,8 +131,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = config('CELERY_BROKER', default='redis://redis:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -144,7 +143,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [(config('REDIS_HOST', default='redis'), 6379)],
+            "hosts": [(os.getenv('REDIS_HOST', 'redis'), 6379)],
         },
     },
 }
@@ -152,37 +151,36 @@ CHANNEL_LAYERS = {
 # File Upload Settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
-CHUNK_SIZE = config('CHUNK_SIZE', default=5 * 1024 * 1024, cast=int)
-MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=16 * 1024 * 1024 * 1024, cast=int)  # 16GB
+CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', str(5 * 1024 * 1024)))
+MAX_UPLOAD_SIZE = int(os.getenv('MAX_UPLOAD_SIZE', str(16 * 1024 * 1024 * 1024)))  # 16GB
 
 # MinIO Configuration
-MINIO_ENDPOINT = config('MINIO_ENDPOINT', default='minio:9000')
-MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY', default='minioadmin')
-MINIO_SECRET_KEY = config('MINIO_SECRET_KEY', default='minioadmin123')
-MINIO_SECURE = config('MINIO_SECURE', default=False, cast=bool)
+MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'minio:9000')
+MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
+MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin123')
+MINIO_SECURE = os.getenv('MINIO_SECURE', 'False').lower() == 'true'
 
+# GIS and Mapping Configuration
+GDAL_LIBRARY_PATH = None  # Let Django find GDAL automatically
+GEOS_LIBRARY_PATH = None  # Let Django find GEOS automatically
 
-# backend/thermal_analysis/settings/development.py
-from .base import *
-
-DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend']
-
-# Additional development settings
-CORS_ALLOW_ALL_ORIGINS = True
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
+# Custom GIS settings for better admin experience
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (40.7128, -74.0060),  # Default to NYC, change to your area
+    'DEFAULT_ZOOM': 15,
+    'MIN_ZOOM': 3,
+    'MAX_ZOOM': 18,
+    'TILES': [
+        ('OpenStreetMap', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            'attribution': '&copy; OpenStreetMap contributors',
+            'maxZoom': 18,
+        }),
+        ('Satellite', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            'attribution': 'Tiles &copy; Esri',
+            'maxZoom': 18,
+        }),
+    ],
 }
 
+# Alternative: Use higher DPI tiles for better quality
+GEOPOSITION_GOOGLE_MAPS_API_KEY = None  # Add Google Maps API key if you want to use Google Maps

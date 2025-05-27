@@ -37,8 +37,12 @@ RUN git clone https://github.com/facebookresearch/sam2.git
 WORKDIR ${APP_ROOT}/sam2
 RUN pip install -e ".[interactive-demo]"
 
-# Fix FFmpeg path issue (from SAM 2's Dockerfile)
-RUN rm /opt/conda/bin/ffmpeg && ln -s /bin/ffmpeg /opt/conda/bin/ffmpeg
+# Fix FFmpeg path issue (make it conditional)
+RUN if [ -f /opt/conda/bin/ffmpeg ]; then \
+        rm /opt/conda/bin/ffmpeg && ln -s /bin/ffmpeg /opt/conda/bin/ffmpeg; \
+    else \
+        echo "FFmpeg already properly configured"; \
+    fi
 
 # Download SAM 2.1 checkpoints
 RUN mkdir -p checkpoints
