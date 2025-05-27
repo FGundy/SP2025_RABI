@@ -1,0 +1,7 @@
+# backend/apps/analysis/routing.py (WebSocket routing)
+from django.urls import re_path
+from . import consumers
+
+websocket_urlpatterns = [
+    re_path(r'ws/analysis/(?P<session_id>\w+)/$', consumers.AnalysisConsumer.as_asgi()),
+]
