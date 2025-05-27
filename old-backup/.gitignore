@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+venv/
+.env
+*.so
+.Python
+# Data files
+data/raw/*.jpg
+data/raw/*.jpeg
+data/raw/*.tiff
+data/raw/*.png
+# Except
