@@ -1,12 +1,17 @@
+# backend/apps/analysis/models.py
+# 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, Polygon
+from django.utils import timezone  # ADD THIS IMPORT
 from apps.buildings.models import BuildingProject, VideoFile
 import uuid
 
 
 class AnalysisSession(models.Model):
     """Represents a video analysis session using SAM 2"""
+    
+    # Session statuses
     SESSION_STATUSES = [
         ('initializing', 'Initializing'),
         ('active', 'Active'),
@@ -14,36 +19,255 @@ class AnalysisSession(models.Model):
         ('completed', 'Completed'),
         ('error', 'Error'),
     ]
+    
+    # SAM 2 model choices
+    SAM2_MODEL_CHOICES = [
+        ('tiny', 'SAM 2 Tiny (38.9M params) - Fast, low memory'),
+        ('small', 'SAM 2 Small (46.0M params) - Balanced'),
+        ('base_plus', 'SAM 2 Base Plus (80.8M params) - High quality'),
+        ('large', 'SAM 2 Large (224.4M params) - Best quality, high memory'),
+    ]
+    
+    # Analysis type choices
+    ANALYSIS_TYPE_CHOICES = [
+        ('thermal_anomaly', 'Thermal Anomaly Detection'),
+        ('material_mapping', 'Material Mapping'),
+        ('insulation_analysis', 'Insulation Analysis'),
+        ('air_leakage', 'Air Leakage Detection'),
+        ('structural_analysis', 'Structural Analysis'),
+    ]
 
+    # Primary key and relationships
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    building_project = models.ForeignKey(BuildingProject, on_delete=models.CASCADE, related_name='analysis_sessions')
-    video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE, related_name='analysis_sessions')
+    building_project = models.ForeignKey(
+        BuildingProject, 
+        on_delete=models.CASCADE, 
+        related_name='analysis_sessions'
+    )
+    video_file = models.ForeignKey(
+        VideoFile, 
+        on_delete=models.CASCADE, 
+        related_name='analysis_sessions'
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # Session metadata
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=SESSION_STATUSES, default='initializing')
+    status = models.CharField(
+        max_length=20, 
+        choices=SESSION_STATUSES, 
+        default='initializing'
+    )
+    
+    # SAM 2 configuration
+    sam2_model = models.CharField(
+        max_length=20,
+        choices=SAM2_MODEL_CHOICES,
+        default='base_plus',
+        help_text='SAM 2 model size affects quality vs memory usage'
+    )
     
     # SAM 2 session info
-    sam2_session_id = models.CharField(max_length=100, blank=True)  # UUID from SAM 2 service
+    sam2_session_id = models.CharField(
+        max_length=100, 
+        blank=True,
+        help_text='UUID from SAM 2 service'
+    )
     
     # Analysis parameters
-    target_materials = models.JSONField(default=list)  # List of materials to focus on
-    analysis_type = models.CharField(max_length=50, default='thermal_anomaly')  # thermal_anomaly, material_mapping, etc.
+    analysis_type = models.CharField(
+        max_length=50, 
+        choices=ANALYSIS_TYPE_CHOICES,
+        default='thermal_anomaly'
+    )
+    target_materials = models.JSONField(
+        default=list,
+        help_text='List of materials to focus on'
+    )
     
     # Progress tracking
     total_frames_analyzed = models.IntegerField(default=0)
     total_objects_tracked = models.IntegerField(default=0)
     
+    # Processing parameters
+    confidence_threshold = models.FloatField(
+        default=0.5,
+        help_text='Minimum confidence threshold for detections'
+    )
+    enable_tracking = models.BooleanField(
+        default=True,
+        help_text='Enable object tracking across frames'
+    )
+    
+    # Memory management settings
+    offload_to_cpu = models.BooleanField(
+        default=True,
+        help_text='Offload video frames to CPU to save GPU memory'
+    )
+    max_memory_frames = models.IntegerField(
+        default=5,
+        help_text='Maximum number of frames to keep in GPU memory'
+    )
+    
+    # Results and error handling
+    error_message = models.TextField(
+        blank=True,
+        help_text='Error message if analysis fails'
+    )
+    results_summary = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Summary of analysis results'
+    )
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Analysis Session'
+        verbose_name_plural = 'Analysis Sessions'
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['sam2_model']),
+            models.Index(fields=['analysis_type']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"{self.building_project.name} - {self.name}"
+    
+    @property
+    def is_active(self):
+        """Check if the analysis session is currently active"""
+        return self.status in ['initializing', 'active', 'processing']
+    
+    @property
+    def progress_percentage(self):
+        """Calculate progress percentage based on frames analyzed"""
+        if not self.video_file or not hasattr(self.video_file, 'frame_count'):
+            return 0
+        
+        total_frames = getattr(self.video_file, 'frame_count', 0)
+        if total_frames == 0:
+            return 0
+            
+        return min(100, (self.total_frames_analyzed / total_frames) * 100)
+    
+    @property
+    def duration_seconds(self):
+        """Get the duration of the analysis session in seconds"""
+        if not self.started_at:
+            return 0
+        
+        end_time = self.completed_at or timezone.now()
+        return (end_time - self.started_at).total_seconds()
+    
+    def get_model_info(self):
+        """Get detailed information about the selected SAM 2 model"""
+        model_info = {
+            'tiny': {
+                'parameters': '38.9M',
+                'memory_usage': 'Low (~1-2GB)',
+                'speed': 'Fastest',
+                'quality': 'Good'
+            },
+            'small': {
+                'parameters': '46.0M', 
+                'memory_usage': 'Medium (~2-4GB)',
+                'speed': 'Fast',
+                'quality': 'Better'
+            },
+            'base_plus': {
+                'parameters': '80.8M',
+                'memory_usage': 'High (~4-6GB)', 
+                'speed': 'Medium',
+                'quality': 'High'
+            },
+            'large': {
+                'parameters': '224.4M',
+                'memory_usage': 'Very High (~6-8GB)',
+                'speed': 'Slower',
+                'quality': 'Best'
+            }
+        }
+        return model_info.get(self.sam2_model, {})
+    
+    def get_recommended_model(self):
+        """Get recommended model based on video characteristics"""
+        if not self.video_file:
+            return 'base_plus'
+        
+        # Get video info if available
+        video_info = getattr(self.video_file, 'metadata', {})
+        frame_count = video_info.get('frame_count', 0)
+        is_4k = video_info.get('width', 0) >= 3840
+        
+        # Recommendation logic
+        if is_4k and frame_count > 2000:
+            return 'tiny'  # Large 4K videos
+        elif is_4k and frame_count > 1000:
+            return 'small'  # Medium 4K videos
+        elif frame_count > 5000:
+            return 'tiny'  # Very long videos
+        elif frame_count > 2000:
+            return 'small'  # Long videos
+        else:
+            return 'base_plus'  # Default for smaller videos
+    
+    def get_memory_estimate(self):
+        """Estimate memory usage based on model and video characteristics"""
+        base_memory = {
+            'tiny': 1.5,    # GB
+            'small': 2.5,   # GB
+            'base_plus': 4.0,  # GB
+            'large': 6.0    # GB
+        }
+        
+        model_memory = base_memory.get(self.sam2_model, 4.0)
+        
+        # Add video-specific memory overhead
+        if self.video_file:
+            video_info = getattr(self.video_file, 'metadata', {})
+            is_4k = video_info.get('width', 0) >= 3840
+            frame_count = video_info.get('frame_count', 0)
+            
+            if is_4k:
+                model_memory += 2.0  # Additional overhead for 4K
+            if frame_count > 3000:
+                model_memory += 1.0  # Additional overhead for long videos
+        
+        return model_memory
+    
+    def save(self, *args, **kwargs):
+        """Override save to set timestamps and validate model selection"""
+        # Set started_at when status changes to active/processing
+        if self.status in ['active', 'processing'] and not self.started_at:
+            self.started_at = timezone.now()
+        
+        # Set completed_at when status changes to completed/error
+        if self.status in ['completed', 'error'] and not self.completed_at:
+            self.completed_at = timezone.now()
+        
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        """Validate the model selection"""
+        from django.core.exceptions import ValidationError
+        
+        recommended_model = self.get_recommended_model()
+        estimated_memory = self.get_memory_estimate()
+        
+        # Warn if using a large model for a large video
+        if self.sam2_model == 'large' and estimated_memory > 8.0:
+            raise ValidationError(
+                f"Large model may require {estimated_memory:.1f}GB GPU memory. "
+                f"Consider using '{recommended_model}' model instead."
+            )
 
 
 class ClickPrompt(models.Model):
