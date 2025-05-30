@@ -39,3 +39,10 @@ MINIO_ENDPOINT = config('MINIO_ENDPOINT', default='minio:9000')
 MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY', default='minioadmin')
 MINIO_SECRET_KEY = config('MINIO_SECRET_KEY', default='minioadmin123')
 MINIO_SECURE = config('MINIO_SECURE', default=False, cast=bool)
+
+# Lazy Loading Configuration
+USE_LAZY_LOADING = config("USE_LAZY_LOADING", default="true", cast=bool)
+LAZY_LOADER_LRU_CACHE_SIZE = config("LAZY_LOADER_LRU_CACHE_SIZE", default=15, cast=int)
+LAZY_LOADER_SEQUENTIAL_PREFETCH = config("LAZY_LOADER_SEQUENTIAL_PREFETCH", default=3, cast=int)
+LAZY_LOADER_MAX_CACHE_MEMORY_GB = config("LAZY_LOADER_MAX_CACHE_MEMORY_GB", default=2.0, cast=float)
+

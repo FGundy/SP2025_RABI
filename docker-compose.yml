@@ -72,6 +72,8 @@ services:
       - ./sam2_worker:/app
       - sam2_cache:/root/.cache
       - upload_temp:/tmp/uploads
+      - ./my_videos:/videos:ro  
+
     depends_on:
       - redis
       - minio
