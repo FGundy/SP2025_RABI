@@ -1,3 +1,6 @@
 [submodule "external/sam2"]
 	path = external/sam2
 	url = https://github.com/facebookresearch/sam2.git
+[submodule "ui_components/segment-anything-ui"]
+	path = ui_components/segment-anything-ui
+	url = https://github.com/branislavhesko/segment-anything-ui.git
