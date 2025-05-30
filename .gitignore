@@ -12,3 +12,5 @@ data/raw/*.jpeg
 data/raw/*.tiff
 data/raw/*.png
 # Except
+ui_components/segment-anything-ui/sam_vit_h_4b8939.pth
+ui_components/segment-anything-ui/thermal_ui_env/

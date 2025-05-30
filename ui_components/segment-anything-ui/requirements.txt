@@ -1,0 +1,10 @@
+pyside6
+opencv-python
+torch
+torchvision
+numpy
+segment-anything
+matplotlib
+scikit-image
+tqdm
+wget
